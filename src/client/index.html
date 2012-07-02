@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html><head><title>baoshan/docas » src › client › index.coffee
+| Browser-side script used by index.html
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="../../stylesheets/docco.min.css" />
+<link rel="stylesheet" type="text/css" media="all" href="../../docas/common.css" />
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="../../index.html"></a><h1>index.coffee</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div><p>Browser-side script used by index.html</p></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-2"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div><h2>Widget A: Languages Stats</h2>
+
+<p>Animate bar chart of languages statistics on page load.</p></td><td class="code"><div class="highlight"><pre><span class="nv">bars = </span><span class="nx">$</span><span class="p">(</span><span class="s">&#39;#code_stats span[percent]&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="nx">bars</span><span class="p">.</span><span class="nx">length</span>
+  <span class="nv">start_index = </span><span class="nx">bars</span><span class="p">.</span><span class="nx">length</span>
+  <span class="nv">fps = </span><span class="mi">20</span>
+  <span class="nv">duration = </span><span class="mi">1000</span>
+  <span class="nx">do</span> <span class="nv">animate = </span><span class="o">-&gt;</span>
+    <span class="k">return</span> <span class="nx">unless</span> <span class="nx">start_index</span>
+    <span class="nv">bar = </span><span class="nx">$</span> <span class="nx">bars</span><span class="p">[</span><span class="o">--</span><span class="nx">start_index</span><span class="p">]</span>
+    <span class="nv">number_span = </span><span class="nx">bar</span><span class="p">.</span><span class="nx">next</span><span class="p">()</span>
+    <span class="nv">total = </span><span class="mi">1</span> <span class="o">*</span> <span class="nx">number_span</span><span class="p">.</span><span class="nx">attr</span> <span class="s">&#39;total&#39;</span>
+    <span class="nx">do</span> <span class="nf">(number_span, total) -&gt;</span>
+      <span class="nv">current = </span><span class="mi">0</span>
+      <span class="nv">step = </span><span class="nx">total</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nx">duration</span> <span class="o">/</span> <span class="nx">fps</span>
+      <span class="nx">do</span> <span class="nv">increase = </span><span class="o">-&gt;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">current</span> <span class="o">+=</span> <span class="nx">step</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nx">total</span>
+          <span class="nv">current = </span><span class="nx">total</span>
+        <span class="k">else</span>
+          <span class="nx">setTimeout</span> <span class="nx">increase</span><span class="p">,</span> <span class="mi">1000</span> <span class="o">/</span> <span class="nx">fps</span>
+        <span class="nx">number_span</span><span class="p">.</span><span class="nx">html</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">current</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; sloc&#39;</span>
+    <span class="k">return</span> <span class="nx">animate</span><span class="p">()</span> <span class="k">if</span> <span class="nx">bar</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&#39;percent&#39;</span><span class="p">)</span> <span class="o">is</span> <span class="nx">bar</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s">&#39;width&#39;</span><span class="p">)</span>
+    <span class="nx">bar</span><span class="p">.</span><span class="nx">animate</span>
+      <span class="nv">width: </span><span class="nx">bar</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&#39;percent&#39;</span><span class="p">)</span>
+    <span class="p">,</span> <span class="nx">duration</span><span class="p">,</span> <span class="s">&#39;linear&#39;</span><span class="p">,</span> <span class="nx">animate</span></pre></div></td></tr>
+
+
+<tr id="section-3"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div><h2>Widget B: Markdown Browser</h2></td><td class="code"><div class="highlight"><pre><span class="nv">current_markdown_path = </span><span class="s">&quot;README.html&quot;</span>
+
+<span class="nv">show_markdown = </span><span class="nf">(index_path, file) -&gt;</span>
+  <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span>
+    <span class="nv">url: </span><span class="p">[</span><span class="nx">index_path</span><span class="p">...,</span> <span class="nx">file</span><span class="p">].</span><span class="nx">join</span> <span class="s">&#39;/&#39;</span>
+    <span class="nv">success: </span><span class="nf">(html) -&gt;</span>
+      <span class="k">return</span> <span class="nx">unless</span> <span class="nx">html</span>
+      <span class="nv">current_markdown_path = </span><span class="p">[</span><span class="nx">index_path</span><span class="p">...,</span> <span class="nx">file</span><span class="p">].</span><span class="nx">join</span><span class="p">()</span>
+      <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.markdown_browser&#39;</span><span class="p">).</span><span class="nx">animate</span> <span class="p">{</span>
+        <span class="nv">opacity: </span><span class="mi">0</span>
+      <span class="p">},</span> <span class="mi">400</span><span class="p">,</span> <span class="s">&#39;linear&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+        <span class="nv">markdown_container = </span><span class="nx">$</span><span class="p">(</span><span class="s">&#39;.markdown_browser&#39;</span><span class="p">).</span><span class="nx">parent</span><span class="p">()</span>
+        <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.markdown_browser&#39;</span><span class="p">).</span><span class="nx">remove</span><span class="p">()</span>
+        <span class="nv">new_markdown = </span><span class="nx">$</span><span class="p">(</span><span class="s">&quot;&lt;div class=&#39;markdown_browser&#39;&gt;</span><span class="si">#{</span><span class="nx">html</span><span class="si">}</span><span class="s">&lt;/div&gt;&quot;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s">&#39;opacity&#39;</span><span class="p">,</span> <span class="s">&#39;0&#39;</span><span class="p">)</span>
+        <span class="nx">$</span><span class="p">(</span><span class="nx">markdown_container</span><span class="p">).</span><span class="nx">append</span> <span class="nx">new_markdown</span>
+        <span class="nx">$</span><span class="p">(</span><span class="nx">new_markdown</span><span class="p">).</span><span class="nx">animate</span> <span class="p">{</span>
+           <span class="nv">opacity: </span><span class="mi">1</span>
+        <span class="p">},</span> <span class="mi">400</span><span class="p">,</span> <span class="s">&quot;linear&quot;</span></pre></div></td></tr>
+
+
+<tr id="section-4"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div><h2>Widget C: GitHub Styled Repo Browser</h2></td><td class="code"><div class="highlight"><pre><span class="p">{</span> <span class="nx">user</span><span class="p">,</span> <span class="nx">repo</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">docas</span></pre></div></td></tr>
+
+
+<tr id="section-5"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div><h3>Hand-Made Template for Breadcrumb Navigation</h3></td><td class="code"><div class="highlight"><pre><span class="nv">breadcrumb_template = </span><span class="nf">(path) -&gt;</span>
+  <span class="nv">path = </span><span class="p">[</span><span class="nx">repo</span><span class="p">,</span> <span class="nx">path</span><span class="p">...]</span>
+  <span class="nv">result = </span><span class="s">&#39;&#39;</span>
+  <span class="k">for</span> <span class="nx">dir</span><span class="p">,</span> <span class="nx">i</span> <span class="k">in</span> <span class="nx">path</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">path</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="nx">result</span> <span class="o">+=</span> <span class="s">&#39;&lt;a depth=&#39;</span> <span class="o">+</span> <span class="nx">i</span> <span class="o">+</span> <span class="s">&#39;&gt;&#39;</span> <span class="o">+</span> <span class="nx">dir</span> <span class="o">+</span> <span class="s">&#39;&lt;/a&gt;&amp;nbsp;/&amp;nbsp;&#39;</span>
+    <span class="k">else</span>
+      <span class="nx">result</span> <span class="o">+=</span> <span class="s">&#39;&lt;span&gt;&#39;</span> <span class="o">+</span> <span class="nx">dir</span> <span class="o">+</span> <span class="s">&#39;&lt;/span&gt;&#39;</span>
+  <span class="nx">result</span>
+
+<span class="nv">post_render = </span><span class="nf">(table, index_path) -&gt;</span>
+
+  <span class="nx">update_usernames</span><span class="p">()</span></pre></div></td></tr>
+
+
+<tr id="section-6"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div><h4>Handling Content Interaction</h4></td><td class="code"><div class="highlight"><pre>  <span class="nx">$</span><span class="p">(</span><span class="nx">table</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;a[backward]&#39;</span><span class="p">).</span><span class="nx">click</span> <span class="o">-&gt;</span>
+    <span class="nx">render_tree_browser</span> <span class="nx">index_path</span><span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">index_path</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+  <span class="nx">$</span><span class="p">(</span><span class="nx">table</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;a[forward]&#39;</span><span class="p">).</span><span class="nx">click</span> <span class="o">-&gt;</span>
+    <span class="nx">render_tree_browser</span> <span class="p">[</span><span class="nx">index_path</span><span class="p">...,</span> <span class="nx">$</span><span class="p">(</span><span class="nx">@</span><span class="p">).</span><span class="nx">html</span><span class="p">()]</span>
+
+  <span class="nx">$</span><span class="p">(</span><span class="nx">table</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;a[markdown]&#39;</span><span class="p">).</span><span class="nx">click</span> <span class="o">-&gt;</span>
+    <span class="nv">file_name = </span><span class="nx">$</span><span class="p">(</span><span class="nx">@</span><span class="p">).</span><span class="nx">attr</span> <span class="s">&#39;markdown&#39;</span>
+    <span class="nv">current_row = </span><span class="nx">$</span><span class="p">(</span><span class="nx">@</span><span class="p">).</span><span class="nx">parent</span><span class="p">().</span><span class="nx">parent</span><span class="p">()</span>
+    <span class="nx">current_row</span><span class="p">.</span><span class="nx">siblings</span><span class="p">().</span><span class="nx">removeClass</span> <span class="s">&#39;shown&#39;</span>
+    <span class="nx">current_row</span><span class="p">.</span><span class="nx">addClass</span> <span class="s">&#39;shown&#39;</span>
+    <span class="k">if</span> <span class="nx">current_markdown_path</span> <span class="o">isnt</span> <span class="p">[</span><span class="nx">index_path</span><span class="p">...,</span> <span class="nx">file_name</span><span class="p">].</span><span class="nx">join</span><span class="p">()</span>
+      <span class="nx">show_markdown</span> <span class="nx">index_path</span><span class="p">,</span> <span class="nx">file_name</span>
+
+  <span class="nx">$</span><span class="p">(</span><span class="nx">table</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;thead th:nth-child(3) &gt; :first-child&#39;</span><span class="p">).</span><span class="nx">click</span> <span class="o">-&gt;</span>
+    <span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span> <span class="s">&#39;size&#39;</span><span class="p">,</span> <span class="s">&#39;sloc&#39;</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.repo_nav tr &gt; :nth-child(3)&#39;</span><span class="p">).</span><span class="nx">attr</span> <span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="s">&#39;sloc&#39;</span>
+
+  <span class="nx">$</span><span class="p">(</span><span class="nx">table</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;thead th:nth-child(3) &gt; :last-child&#39;</span><span class="p">).</span><span class="nx">click</span> <span class="o">-&gt;</span>
+    <span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span> <span class="s">&#39;size&#39;</span><span class="p">,</span> <span class="s">&#39;size&#39;</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.repo_nav tr &gt; :nth-child(3)&#39;</span><span class="p">).</span><span class="nx">attr</span> <span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="s">&#39;size&#39;</span>
+
+  <span class="nx">$</span><span class="p">(</span><span class="nx">table</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;thead th:last-child &gt; :first-child&#39;</span><span class="p">).</span><span class="nx">click</span> <span class="o">-&gt;</span>
+    <span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span> <span class="s">&#39;message&#39;</span><span class="p">,</span> <span class="s">&#39;message&#39;</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.repo_nav tr &gt; :last-child&#39;</span><span class="p">).</span><span class="nx">attr</span> <span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="s">&#39;message&#39;</span>
+
+  <span class="nx">$</span><span class="p">(</span><span class="nx">table</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;thead th:last-child &gt; :nth-child(2)&#39;</span><span class="p">).</span><span class="nx">click</span> <span class="o">-&gt;</span>
+    <span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span> <span class="s">&#39;message&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.repo_nav tr &gt; :last-child&#39;</span><span class="p">).</span><span class="nx">attr</span> <span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span></pre></div></td></tr>
+
+
+<tr id="section-7"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div><h4>Pushing / Poping the Table</h4></td><td class="code"><div class="highlight"><pre>  <span class="k">return</span> <span class="k">if</span> <span class="nx">$</span><span class="p">(</span><span class="nx">table</span><span class="p">).</span><span class="nx">parent</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="nv">current_table = </span><span class="nx">$</span><span class="p">(</span><span class="s">&#39;#filelists &gt; div&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="nv">direction = </span><span class="k">if</span> <span class="nx">index_path</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="nb">parseInt</span> <span class="nx">$</span><span class="p">(</span><span class="nx">current_table</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s">&#39;depth&#39;</span><span class="p">)</span> <span class="k">then</span> <span class="s">&#39;l&#39;</span> <span class="k">else</span> <span class="s">&#39;r&#39;</span>
+  <span class="nv">width = </span><span class="nx">$</span><span class="p">(</span><span class="nx">current_table</span><span class="p">).</span><span class="nx">width</span><span class="p">()</span> <span class="o">+</span> <span class="nb">parseInt</span> <span class="nx">$</span><span class="p">(</span><span class="nx">current_table</span><span class="p">).</span><span class="nx">css</span> <span class="s">&#39;margin-right&#39;</span>
+  <span class="nx">$</span><span class="p">(</span><span class="nx">table</span><span class="p">).</span><span class="nx">css</span> <span class="s">&#39;margin-left&#39;</span><span class="p">,</span> <span class="o">-</span><span class="nx">width</span> <span class="k">if</span> <span class="nx">direction</span> <span class="o">is</span> <span class="s">&#39;r&#39;</span>
+  <span class="nx">$</span><span class="p">(</span><span class="s">&#39;#filelists&#39;</span><span class="p">)[</span><span class="k">if</span> <span class="nx">direction</span> <span class="o">is</span> <span class="s">&#39;r&#39;</span> <span class="k">then</span> <span class="s">&#39;prepend&#39;</span> <span class="k">else</span> <span class="s">&#39;append&#39;</span><span class="p">]</span> <span class="nx">table</span>
+  <span class="nx">$</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s">&#39;#filelists&#39;</span><span class="p">).</span><span class="nx">children</span><span class="p">()[</span><span class="mi">0</span><span class="p">]).</span><span class="nx">animate</span>
+    <span class="s">&#39;margin-left&#39;</span><span class="o">:</span> <span class="p">(</span><span class="k">if</span> <span class="nx">direction</span> <span class="o">is</span> <span class="s">&#39;r&#39;</span> <span class="k">then</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nx">width</span>
+  <span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="s">&#39;linear&#39;</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="nx">$</span><span class="p">(</span><span class="nx">current_table</span><span class="p">).</span><span class="nx">remove</span><span class="p">()</span>
+
+<span class="nv">waiting_for_response = </span><span class="kc">off</span>
+
+<span class="nv">render_tree_browser = </span><span class="nf">(index_path) -&gt;</span>
+
+  <span class="k">return</span> <span class="k">if</span> <span class="nx">waiting_for_response</span>
+
+  <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.tree_browser_spinner&#39;</span><span class="p">).</span><span class="nx">show</span><span class="p">()</span>
+  <span class="nv">waiting_for_response = </span><span class="kc">on</span></pre></div></td></tr>
+
+
+<tr id="section-8"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-8">&#182;</a></div><h4>Ajax Call to Get Index</h4>
+
+<p>If browser caching becomes a problem, append</p>
+
+<pre><code>"?timestamp=#{Date.now().valueOf()}"
+</code></pre>
+
+<p>as the query string.</p></td><td class="code"><div class="highlight"><pre>  <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span>
+    <span class="nv">url: </span><span class="p">[</span><span class="nx">index_path</span><span class="p">...,</span> <span class="s">&#39;docas.idx&#39;</span><span class="p">].</span><span class="nx">join</span> <span class="s">&#39;/&#39;</span>
+
+    <span class="nv">success: </span><span class="nf">(index) -&gt;</span>
+      <span class="nv">waiting_for_response = </span><span class="kc">off</span>
+      <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.tree_browser_spinner&#39;</span><span class="p">).</span><span class="nx">hide</span><span class="p">()</span></pre></div></td></tr>
+
+
+<tr id="section-9"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-9">&#182;</a></div><h4>Render Breadcrumb Navigator</h4></td><td class="code"><div class="highlight"><pre>      <span class="nx">$</span><span class="p">(</span><span class="s">&#39;#breadcrumb&#39;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">html</span><span class="p">(</span><span class="nx">breadcrumb_template</span> <span class="nx">index_path</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">).</span><span class="nx">click</span> <span class="o">-&gt;</span>
+          <span class="nx">render_tree_browser</span> <span class="nx">index_path</span><span class="p">[</span><span class="mi">0</span><span class="p">...</span><span class="nx">$</span><span class="p">(</span><span class="nx">@</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s">&#39;depth&#39;</span><span class="p">)]</span></pre></div></td></tr>
+
+
+<tr id="section-10"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-10">&#182;</a></div><h4>Render Content Table</h4></td><td class="code"><div class="highlight"><pre>      <span class="nv">table = </span><span class="nx">$</span> <span class="nx">list_template</span>
+        <span class="nv">user       : </span><span class="nx">user</span>
+        <span class="nv">repo       : </span><span class="nx">repo</span>
+        <span class="nv">index_path : </span><span class="nx">index_path</span>
+        <span class="nv">entries    : </span><span class="nx">process_index</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">index_path</span><span class="p">,</span> <span class="nx">repo</span><span class="p">)</span>
+        <span class="nv">size       : </span><span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span> <span class="s">&#39;size&#39;</span>
+        <span class="nv">message    : </span><span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span> <span class="s">&#39;message&#39;</span>
+
+      <span class="nx">post_render</span> <span class="nx">table</span><span class="p">,</span> <span class="nx">index_path</span>
+
+  <span class="k">if</span> <span class="nx">current_markdown_path</span> <span class="o">isnt</span> <span class="p">[</span><span class="nx">index_path</span><span class="p">...,</span> <span class="s">&#39;README.html&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">()</span>
+    <span class="nx">show_markdown</span> <span class="nx">index_path</span><span class="p">,</span> <span class="s">&#39;README.html&#39;</span></pre></div></td></tr>
+
+
+<tr id="section-11"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-11">&#182;</a></div><h3>Replace Emails by GitHub Logins</h3>
+
+<p>By leveraging GitHub api, repo navigator can replace emails by real GitHub
+logins.</p>
+
+<p><strong>Notice:</strong> every new domain should be registered through <strong>Register a new
+OAuth application</strong> before making cross-domain ajax requests successfully.</p></td><td class="code"><div class="highlight"><pre><span class="nv">usernames = </span><span class="p">{}</span>
+
+<span class="nv">update_usernames = </span><span class="o">-&gt;</span>
+  <span class="nv">emails = </span><span class="p">{}</span>
+  <span class="k">for</span> <span class="nx">span</span> <span class="k">in</span> <span class="nx">$</span><span class="p">(</span><span class="s">&quot;</span><span class="err">#</span><span class="s">filelists span[email]&quot;</span><span class="p">)</span>
+    <span class="nx">emails</span><span class="p">[</span><span class="nx">$</span><span class="p">(</span><span class="nx">span</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;email&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">null</span>
+  <span class="k">for</span> <span class="nx">email</span> <span class="k">of</span> <span class="nx">emails</span>
+    <span class="nx">do</span> <span class="nf">(email) -&gt;</span>
+      <span class="nv">update_table = </span><span class="nf">(username) -&gt;</span>
+        <span class="nx">$</span><span class="p">(</span><span class="s">&quot;span[email=&#39;</span><span class="si">#{</span><span class="nx">email</span><span class="si">}</span><span class="s">&#39;]&quot;</span><span class="p">)</span>
+          <span class="p">.</span><span class="nx">html</span><span class="p">(</span><span class="s">&quot;&lt;a href=&#39;https://github.com/</span><span class="si">#{</span><span class="nx">username</span><span class="si">}</span><span class="s">&#39;&gt;</span><span class="si">#{</span><span class="nx">username</span><span class="si">}</span><span class="s">&lt;/a&gt;&quot;</span><span class="p">)</span>
+          <span class="p">.</span><span class="nx">removeAttr</span><span class="p">(</span><span class="s">&quot;email&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nx">usernames</span><span class="p">.</span><span class="nx">hasOwnProperty</span> <span class="nx">email</span>
+        <span class="nx">update_table</span> <span class="nx">usernames</span><span class="p">[</span><span class="nx">email</span><span class="p">]</span>
+      <span class="k">else</span>
+        <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span>
+          <span class="nv">url: </span><span class="s">&quot;https://api.github.com/legacy/user/email/</span><span class="si">#{</span><span class="nx">email</span><span class="si">}</span><span class="s">&quot;</span>
+          <span class="nv">error: </span><span class="o">-&gt;</span>
+            <span class="nx">usernames</span><span class="p">[</span><span class="nx">email</span><span class="p">]</span> <span class="o">=</span> <span class="kc">null</span>
+          <span class="nv">success: </span><span class="nf">(data) -&gt;</span>
+            <span class="nx">update_table</span> <span class="nx">usernames</span><span class="p">[</span><span class="nx">email</span><span class="p">]</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">data</span><span class="p">).</span><span class="nx">user</span><span class="p">.</span><span class="nx">login</span></pre></div></td></tr>
+
+
+<tr id="section-12"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-12">&#182;</a></div><h2>Page Load</h2></td><td class="code"><div class="highlight"><pre><span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span><span class="p">(</span><span class="s">&#39;size&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span><span class="p">(</span><span class="s">&#39;size&#39;</span><span class="p">)</span> <span class="o">or</span> <span class="s">&#39;size&#39;</span><span class="p">))</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span><span class="p">(</span><span class="s">&#39;message&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span><span class="p">(</span><span class="s">&#39;message&#39;</span><span class="p">)</span> <span class="o">or</span> <span class="s">&#39;message&#39;</span><span class="p">))</span></pre></div></td></tr>
+
+
+<tr id="section-13"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-13">&#182;</a></div><p>On page load, do:</p>
+
+<ul>
+<li>Switch <code>size</code> or <code>sloc</code> according to cookie <code>size</code>.</li>
+<li>Switch <code>message</code> or <code>description</code> according to cookie <code>message</code>.</li>
+</ul></td><td class="code"><div class="highlight"><pre><span class="nx">$</span> <span class="o">-&gt;</span>
+  <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.repo_nav tr &gt; :nth-child(3)&#39;</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span><span class="p">(</span><span class="s">&#39;size&#39;</span><span class="p">))</span>
+  <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.repo_nav tr &gt; :nth-child(5)&#39;</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="nx">$</span><span class="p">.</span><span class="nx">cookie</span><span class="p">(</span><span class="s">&#39;message&#39;</span><span class="p">))</span></pre></div></td></tr>
+
+
+<tr id="section-14"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-14">&#182;</a></div><p>Calculate relative date.</p></td><td class="code"><div class="highlight"><pre><span class="nx">$</span><span class="p">.</span><span class="nx">each</span> <span class="nx">$</span><span class="p">(</span><span class="s">&#39;[relative_date]&#39;</span><span class="p">),</span> <span class="nf">(index, el) -&gt;</span>
+  <span class="nx">$</span><span class="p">(</span><span class="nx">el</span><span class="p">).</span><span class="nx">html</span> <span class="nx">moment</span><span class="p">(</span><span class="k">new</span> <span class="nb">Date</span> <span class="mi">1</span> <span class="o">*</span> <span class="nx">$</span><span class="p">(</span><span class="nx">el</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s">&#39;relative_date&#39;</span><span class="p">)).</span><span class="nx">fromNow</span><span class="p">()</span></pre></div></td></tr>
+
+
+<tr id="section-15"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-15">&#182;</a></div><p>Regist the initial repo browser's events.</p></td><td class="code"><div class="highlight"><pre><span class="nx">post_render</span> <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.repo_nav&#39;</span><span class="p">),</span> <span class="p">[]</span>
+
+</pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+<script src="../../docas/all_src/client/index.coffee_.js" type="text/javascript"></script>
+</body>
+<script>docas={repo:"baoshan/docas",depth:2}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="../../javascript/docco.min.js"></script>
+</html>

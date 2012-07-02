@@ -1,0 +1,9 @@
+page_javascripts:
+  bin/*: examples_[1].js
+  *: all_[1]_[2].js
+
+page_stylesheets:
+  *: common.css
+  bin/*: [1]_tutorial.css
+
+project_page: index.html

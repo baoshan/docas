@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html><head><title>baoshan/docas » src › shared › list_template.coffee
+
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="../../stylesheets/docco.min.css" />
+<link rel="stylesheet" type="text/css" media="all" href="../../docas/common.css" />
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="../../index.html"></a><h1>list_template.coffee</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-2"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div><h3>Micro Template Engine for Rendering Content</h3></td><td class="code"><div class="highlight"><pre><span class="nv">template = </span><span class="nf">(str) -&gt;</span>
+  <span class="k">new</span> <span class="nb">Function</span> <span class="s">&#39;obj&#39;</span><span class="p">,</span>
+    <span class="s">&#39;var p=[],print=function(){p.push.apply(p,arguments);};&#39;</span> <span class="o">+</span>
+    <span class="s">&#39;with(obj){p.push(\&#39;&#39;</span> <span class="o">+</span>
+    <span class="nx">str</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/[\r\t\n]/g</span><span class="p">,</span> <span class="s">&quot; &quot;</span><span class="p">)</span>
+       <span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/&#39;(?=[^&lt;]*%&gt;)/g</span><span class="p">,</span><span class="s">&quot;\t&quot;</span><span class="p">)</span>
+       <span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="p">).</span><span class="nx">join</span><span class="p">(</span><span class="s">&quot;\\&#39;&quot;</span><span class="p">)</span>
+       <span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s">&quot;\t&quot;</span><span class="p">).</span><span class="nx">join</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="p">)</span>
+       <span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/&lt;%=(.+?)%&gt;/g</span><span class="p">,</span> <span class="s">&quot;&#39;,$1,&#39;&quot;</span><span class="p">)</span>
+       <span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s">&#39;&lt;%&#39;</span><span class="p">).</span><span class="nx">join</span><span class="p">(</span><span class="s">&quot;&#39;);&quot;</span><span class="p">)</span>
+       <span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s">&#39;%&gt;&#39;</span><span class="p">).</span><span class="nx">join</span><span class="p">(</span><span class="s">&quot;p.push(&#39;&quot;</span><span class="p">)</span> <span class="o">+</span>
+       <span class="s">&quot;&#39;);}return p.join(&#39;&#39;);&quot;</span></pre></div></td></tr>
+
+
+<tr id="section-3"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div><h3>Template for File Browser</h3></td><td class="code"><div class="highlight"><pre><span class="nv">list_template = </span><span class="nx">template</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">&lt;div depth=&quot;&lt;%= index_path.length %&gt;&quot; class=&quot;filelist&quot;&gt;</span>
+<span class="s">&lt;table class=&quot;repo_nav&quot;&gt;</span>
+<span class="s">&lt;thead&gt;&lt;tr&gt;&lt;th&gt;&lt;/th&gt;&lt;th&gt;name&lt;/th&gt;&lt;th class=&quot;&lt;%= size %&gt;&quot;&gt;&lt;span&gt;sloc&lt;/span&gt;&amp;nbsp;&amp;nbsp;&lt;span&gt;size&lt;/span&gt;&lt;/th&gt;&lt;th&gt;age&lt;/th&gt;&lt;th class=&quot;&lt;%= message %&gt;&quot;&gt;&lt;span&gt;message&lt;/span&gt;&amp;nbsp;&amp;nbsp;&lt;span&gt;description&lt;/span&gt;&lt;div class=&quot;history&quot;&gt;&lt;a target=&quot;_blank&quot; href=&quot;https://github.com/&lt;%= user %&gt;/&lt;%= repo %&gt;/commits/master&quot;&gt;history&lt;/a&gt;&lt;/div&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</span>
+<span class="s">&lt;tbody&gt;</span>
+<span class="s">&lt;% if(index_path.length) { %&gt;</span>
+<span class="s">&lt;tr class=&quot;directory&quot;&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;&lt;a backward&gt;..&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="s">&lt;% } %&gt;</span>
+<span class="s">&lt;% entries.forEach(function(entry) { %&gt;</span>
+<span class="s">&lt;tr class=&quot;&lt;%= entry.type %&gt;&lt;%= entry.is_markdown ? &#39; markdown&#39; : &#39;&#39; %&gt;&lt;%= entry.name.toLowerCase() == &#39;readme.md&#39; ? &#39; shown&#39; : &#39;&#39; %&gt;&quot;&gt;</span>
+<span class="s">&lt;td class=&quot;icon&quot;&gt;&lt;/td&gt;</span>
+<span class="s">&lt;td&gt;&lt;a &lt;%= entry.type == &#39;d&#39; ? &#39;forward&#39; : entry.is_markdown ? &#39;markdown=\&quot;&#39; + entry.document + &#39;\&quot;&#39; : &#39;href=\&quot;&#39; + (entry.type == &#39;m&#39; ? &#39;https://github.com/&#39; + entry.submodule : (entry.action === &#39;s&#39; ? index_path.concat(entry.document).join(&#39;/&#39;) : &#39;https://github.com/&#39; + user + &#39;/&#39; + repo + &#39;/blob/master/&#39; + index_path.concat(entry.name).join(&#39;/&#39;))) + &#39;\&quot;&#39; %&gt;&lt;%= entry.action === &quot;g&quot; ? &quot;target=\&#39;_blank\&#39;&quot;: &quot;&quot; %&gt;&gt;&lt;%= entry.name %&gt;&lt;/a&gt;&lt;/td&gt;</span>
+<span class="s">&lt;td class=&quot;&lt;%= size %&gt;&quot;&gt;&lt;span&gt;&lt;%= entry.sloc ? (entry.sloc + &quot; &quot; + (entry.sloc &gt; 1 ? &quot;lines&quot; : &quot;line&quot;)) : &quot;-&quot; %&gt;&lt;/span&gt;&lt;span&gt;&lt;%= entry.size %&gt;&lt;/span&gt;&lt;/td&gt;</span>
+<span class="s">&lt;td &lt;%= (typeof entry.modified) === &#39;string&#39; ? &#39;&#39; : &#39;relative_date=&quot;&#39; + entry.modified * 1000 + &#39;&quot;&#39; %&gt;&gt;&lt;%= (typeof entry.modified) === &#39;string&#39; ? entry.modified : &#39;&#39; %&gt;&lt;/td&gt;</span>
+<span class="s">&lt;td class=&quot;&lt;%= message %&gt;&quot;&gt;&lt;div&gt;&lt;span&gt;&lt;%= entry.message %&gt;&lt;/span&gt;&lt;span class=&quot;file_browser_author&quot; email=&quot;&lt;%= entry.email %&gt;&quot;&gt; &lt;%= entry.author %&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;%= entry.description %&gt;&lt;/div&gt;&lt;/td&gt;</span>
+<span class="s">&lt;/tr&gt;</span>
+<span class="s">&lt;% }); %&gt;</span>
+<span class="s">&lt;/tbody&gt;</span>
+<span class="s">&lt;/table&gt;</span>
+<span class="s">&lt;div class=&quot;spinner&quot;&gt;&lt;/div&gt;</span>
+<span class="s">&lt;/div&gt;</span>
+<span class="s">&quot;&quot;&quot;</span><span class="p">.</span><span class="nx">replace</span> <span class="s">&#39;\n&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span>
+
+<span class="k">if</span> <span class="k">typeof</span> <span class="nb">window</span> <span class="o">is</span> <span class="s">&#39;undefined&#39;</span>
+  <span class="nv">module.exports = </span><span class="nx">list_template</span>
+
+</pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+<script src="../../docas/all_src/shared/list_template.coffee_.js" type="text/javascript"></script>
+</body>
+<script>docas={repo:"baoshan/docas",depth:2}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="../../javascript/docco.min.js"></script>
+</html>

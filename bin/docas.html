@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html><head><title>baoshan/docas » bin › docas
+
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="../stylesheets/docco.min.css" />
+<link rel="stylesheet" type="text/css" media="all" href="../docas/common.css" /><link rel="stylesheet" type="text/css" media="all" href="../docas/docas_tutorial.css" />
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="../index.html"></a><h1>docas</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div><pre><code>Main (shell) script to orchestrate building processes.
+</code></pre></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-2"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div></td><td class="code"><div class="highlight shebang"><pre><span>#!/usr/bin/env</span> <span>bash
+
+</span></pre></div></td></tr>
+
+
+<tr id="section-3"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div><h2>Introduction</h2>
+
+<p><strong>Docas</strong> is a shell script used by <strong><a href="http://docas.io">Docas.io</a></strong> to generate (and
+synchronize) documentation for GitHub repositories. Docas relies on:</p>
+
+<ol>
+<li><strong><a href="http://git-scm.com">Git</a></strong>, of course!</li>
+<li><strong><a href="http://jashkenas.github.com/docco">Docco</a></strong>, (tweaked slightly), a quick-and-dirty, hundred-line-long,
+literate-programming-style documentation generator by <a href="http://jashkenas.github.com">Jeremy Ashkenas</a>.</li>
+<li><strong><a href="http://github.com/baoshan/linguist_http">Linguist HTTP</a></strong>, a HTTP wrapper for <a href="http://github.com/github/linguist">Linguist</a>.</li>
+</ol>
+
+<p>To use docas as a stand-alone program on your development machine, invoke
+docas from your local git repository.</p>
+
+<pre><code>  $ pwd
+  /path/to/your/repo
+   docas
+</code></pre></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-4"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div><h2>Scripting Procedure</h2></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-5"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div><h3>Step 0: Preparations</h3></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-6"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div><p>Stop execution on error.</p></td><td class="code"><div class="highlight"><pre><span class="nb">set</span> -e</pre></div></td></tr>
+
+
+<tr id="section-7"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div><p>Ensure correct invocation pattern.</p>
+
+<ul>
+<li>When no argument is given, working directory is used to extract user and
+repo name which are used to fetch (or clone) from GitHub. Local files are
+not used to guarantee consistency.</li>
+</ul></td><td class="code"><div class="highlight"><pre><span class="k">if</span> <span class="o">[</span> <span class="nv">$# </span>-eq 0 <span class="o">]</span>; <span class="k">then</span>
+
+<span class="k">  </span><span class="nb">echo</span> <span class="s2">&quot;0&quot;</span>
+  <span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;$(git rev-parse --is-inside-work-tree 2&gt; /dev/null)&quot;</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+<span class="k">  </span><span class="nb">echo</span> <span class="s2">&quot;1&quot;</span>
+ 
+    <span class="nv">addr</span><span class="o">=</span><span class="s2">&quot;$(git remote -v | egrep -m 1 &quot;</span>origin<span class="s2">&quot;)&quot;</span>
+  <span class="nb">echo</span> <span class="s2">&quot;$addr&quot;</span>
+    <span class="nv">repo</span><span class="o">=</span><span class="s2">&quot;$(echo $addr  | grep -P &quot;</span><span class="o">(</span>?&lt;<span class="o">=</span><span class="se">\/</span>|<span class="se">\:</span><span class="o">)[</span>^<span class="se">\.</span><span class="o">]</span>*<span class="o">(</span>?<span class="o">=(</span><span class="se">\.</span>git| <span class="o">))</span><span class="s2">&quot; -o)&quot;</span>
+  <span class="nb">echo</span> <span class="s2">&quot;3&quot;</span>
+    <span class="nv">mode</span><span class="o">=</span><span class="s2">&quot;development&quot;</span>
+    <span class="nb">echo</span> <span class="nv">$mode</span>
+
+  <span class="k">else</span>
+
+<span class="k">    </span><span class="nb">echo</span> -e <span class="s2">&quot;</span>
+<span class="s2">    Docas documents git repository and publish as GitHub pages.</span>
+
+<span class="s2">    Usage:\033[36m docas \033[0m              (document current directory) *</span>
+<span class="s2">    or:   \033[36m docas &lt;user&gt;/&lt;repo&gt;\033[0m (document repository by user and repository name)</span>
+<span class="s2">    </span>
+<span class="s2">    * Sources on GitHub will be used instead of local files to guarantee consistency.</span>
+<span class="s2">    &quot;</span>
+    <span class="nb">exit</span>
+
+<span class="nb">  </span><span class="k">fi</span></pre></div></td></tr>
+
+
+<tr id="section-8"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-8">&#182;</a></div><ul>
+<li>Else, provided argument should be of <code>user/repo</code> pattern, which will be
+used to fetch (or clone) from GitHub.</li>
+</ul></td><td class="code"><div class="highlight"><pre><span class="k">else</span>
+
+<span class="k">  </span><span class="nv">repo</span><span class="o">=</span><span class="nv">$1</span>
+  <span class="nv">mode</span><span class="o">=</span><span class="s2">&quot;production&quot;</span>
+
+<span class="k">fi</span></pre></div></td></tr>
+
+
+<tr id="section-9"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-9">&#182;</a></div><p>Prepare required directories. Total 4 folders are used to accomplish the
+whole task:</p>
+
+<ul>
+<li><code>storage</code> directory, which should be a local non-volatile folder. All
+fetched (or cloned) repositories are persisted on this location to
+accelerate following fetches from GitHub. <code>storage</code> directory locates at
+<code>(home directory)/docas-repos/</code>.</li>
+<li><code>sources</code> directory, holding files of the master branch. <code>source</code>
+directory locates at <code>user/repo</code> inside <code>storage</code> directory.</li>
+<li><code>working</code> directory, holding docas required language statistics, list of
+(all and touched) sources, and also below <code>ghpages</code> directory. Which is a 
+volatile (temporary) folder and should be removed on exit.</li>
+<li><code>ghpages</code> directory, holding generated documentation. <code>ghpages</code> directory
+locates at <code>ghpages</code> inside <code>working</code> directory.</li>
+</ul></td><td class="code"><div class="highlight"><pre><span class="nv">storage_dir</span><span class="o">=</span><span class="s2">&quot;$(echo $HOME)/docas-repos&quot;</span> <span class="o">&amp;&amp;</span> mkdir -p <span class="s2">&quot;$storage_dir&quot;</span> <span class="c"># &amp;&amp; cd &quot;$storage_dir&quot; &amp;&amp; storage_dir=$(pwd -P)</span>
+<span class="nv">sources_dir</span><span class="o">=</span><span class="s2">&quot;$storage_dir/$repo&quot;</span>
+mkdir -p <span class="s2">&quot;$(echo $HOME)/docas-tmp&quot;</span>
+<span class="nv">working_dir</span><span class="o">=</span><span class="s2">&quot;$(mktemp -d $(echo $HOME)/docas-tmp/repo.$$.XXXXXXXXXX)&quot;</span> <span class="o">&amp;&amp;</span> <span class="nb">trap</span> <span class="s2">&quot;rm -rf &quot;</span><span class="nv">$working_dir</span><span class="s2">&quot;; exit;&quot;</span> 0 SIGINT SIGTERM
+<span class="nv">ghpages_dir</span><span class="o">=</span><span class="s2">&quot;$working_dir/ghpages&quot;</span></pre></div></td></tr>
+
+
+<tr id="section-10"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-10">&#182;</a></div><h3>Step 1: Fetch (or Clone) from GitHub</h3></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-11"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-11">&#182;</a></div><p>If <code>sources_dir</code> is a git repository already, then fetch from upstream. The
+<code>--hard</code> option is feeded into <code>git reset</code> to handle repository (or user)
+rename scenarios.</p></td><td class="code"><div class="highlight"><pre><span class="nv">sources_git</span><span class="o">=</span><span class="s2">&quot;$sources_dir/.git&quot;</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$mode</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="o">[</span> -d <span class="s2">&quot;$sources_git&quot;</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="o">[</span> <span class="s2">&quot;$(git --git-dir $sources_git rev-parse --is-inside-work-tree)&quot;</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+
+<span class="k">  </span><span class="nb">echo</span> -n <span class="s2">&quot;Fetching from GitHub...               &quot;</span>
+  <span class="nb">cd</span> <span class="s2">&quot;$sources_dir&quot;</span>
+  git remote prune origin &gt; /dev/null
+  git pull --quiet --force
+  <span class="nb">echo</span> <span class="s2">&quot;✓&quot;</span> <span class="k">$(</span>date <span class="s2">&quot;+%H:%M:%S&quot;</span><span class="k">)</span></pre></div></td></tr>
+
+
+<tr id="section-12"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-12">&#182;</a></div><p>Else, before clone the repository, clear the content of <code>storage_dir</code>. Shallow
+clone is not used to save bandwidth and improve speed. Because a file browser
+needs deep log to correctly show modification history. Otherwise, we could use
+<code>--depth 1</code> shallow clone.</p></td><td class="code"><div class="highlight"><pre><span class="k">else</span>
+
+<span class="k">  </span><span class="nb">echo</span> -n <span class="s2">&quot;Cloning from GitHub...                &quot;</span>
+  rm -rf <span class="s2">&quot;$sources_dir&quot;</span>
+  <span class="k">if</span> <span class="o">[</span> <span class="nv">$mode</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+<span class="k">    </span>git clone --quiet <span class="s2">&quot;git@github.com:$repo.git&quot;</span> <span class="s2">&quot;$sources_dir&quot;</span>
+  <span class="k">else</span>
+<span class="k">    </span>git clone --quiet . <span class="s2">&quot;$sources_dir&quot;</span>
+  <span class="k">fi</span>
+<span class="k">  </span><span class="nb">echo</span> <span class="s2">&quot;✓&quot;</span> <span class="k">$(</span>date <span class="s2">&quot;+%H:%M:%S&quot;</span><span class="k">)</span>
+
+<span class="k">fi</span></pre></div></td></tr>
+
+
+<tr id="section-13"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-13">&#182;</a></div><h3>Step 2: Checkout (or Generate) gh-pages Branch, List Touched Files</h3></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-14"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-14">&#182;</a></div><p>Docas will only re-render documents for touched sources, in some scenarios,
+docas treats all files as touched:</p>
+
+<ol>
+<li><code>gh-pages</code> branch does not exist, which could be mis-judged when invoking
+from a development environment (remote <code>gh-pages</code> branch is untracked). Not
+a problem on docas.io environment.</li>
+<li>No docas commit found from the <code>gh-pages</code> branch, which could be caused
+by first synchronization, or shallow clone.</li>
+<li><code>gh-pages</code> sync found, but could not target according <code>master</code> commit,
+caused by shallow clone.</li>
+</ol></td><td class="code"><div class="highlight"><pre>all_files_are_touched <span class="o">()</span> <span class="o">{</span>
+  cp <span class="s2">&quot;$working_dir/.all&quot;</span> <span class="s2">&quot;$working_dir/.touched&quot;</span>
+  touch <span class="s2">&quot;$working_dir/.deleted&quot;</span>
+  <span class="k">return</span>
+<span class="o">}</span></pre></div></td></tr>
+
+
+<tr id="section-15"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-15">&#182;</a></div><p>Get <code>HEAD</code> commit hash, and list all git versioned files.</p></td><td class="code"><div class="highlight"><pre><span class="nb">cd</span> <span class="s2">&quot;$sources_dir&quot;</span>
+<span class="nv">head_hash</span><span class="o">=</span><span class="s2">&quot;$(git rev-parse HEAD | head -c 7)&quot;</span>
+<span class="nv">head_subject</span><span class="o">=</span><span class="s2">&quot;$(git log -1 --format=%s)&quot;</span>
+git ls-tree -r --name-only HEAD &gt; <span class="s2">&quot;$working_dir/.all&quot;</span></pre></div></td></tr>
+
+
+<tr id="section-16"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-16">&#182;</a></div><p>Create <code>gh-pages</code> branch if not exist, see: <a href="http://help.github.com/pages/#project_pages_manually">GitHub instruction</a>:</p>
+
+<ol>
+<li>Copy sources to <code>gh-pages</code> directory.</li>
+<li>Change to <code>gh-pages</code> directory.</li>
+<li>Create <code>gh-pages</code> branch. </li>
+<li>Clear git index.</li>
+<li>Remove all files.</li>
+</ol>
+
+<p>In this situation, docas considers all directories are dirty.</p></td><td class="code"><div class="highlight"><pre><span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;$(git branch -a | grep origin\/gh-pages | wc -l)&quot;</span> -eq 0 <span class="o">]</span>; <span class="k">then</span>
+
+<span class="k">  </span><span class="nb">echo</span> -n <span class="s2">&quot;Creating gh-pages branch...           &quot;</span>
+  cp -R <span class="s2">&quot;$sources_dir&quot;</span> <span class="s2">&quot;$ghpages_dir&quot;</span> <span class="o">&amp;&amp;</span> <span class="nb">cd</span> <span class="s2">&quot;$ghpages_dir&quot;</span>
+  git symbolic-ref HEAD refs/heads/gh-pages
+  rm -f .git/index
+  git clean --quiet -fdx
+  all_files_are_touched
+  <span class="nb">echo</span> <span class="s2">&quot;✓&quot;</span> <span class="k">$(</span>date <span class="s2">&quot;+%H:%M:%S&quot;</span><span class="k">)</span></pre></div></td></tr>
+
+
+<tr id="section-17"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-17">&#182;</a></div><p>If there exists a <code>gh-pages</code> branch, which means the branch <em>may</em> contain docas
+synchronized content. So, docas will:</p>
+
+<ol>
+<li>Copy sources to <code>ghpages</code> directory.</li>
+<li>Empty <code>ghpages</code> directory, incase of submodules were touched on dev
+machine, which will cause <code>unable to rmdir *name of submodule*: Directory
+not empty</code> warning and unwanted files being left.</li>
+<li>Switch to branch <code>gh-pages</code>.</li>
+<li><p>Analyze touched files. Touched files are:</p>
+
+<p>a. When docas can securely locate the synchronized sources commit, then
+the <code>diff</code> between that commit and <code>HEAD</code> are touched.
+b. Otherwise, docas treats all git versioned files are touched.</p></li>
+</ol></td><td class="code"><div class="highlight"><pre><span class="k">else</span>
+
+<span class="k">  </span>cp -R <span class="s2">&quot;$sources_dir&quot;</span> <span class="s2">&quot;$ghpages_dir&quot;</span> <span class="o">&amp;&amp;</span> <span class="nb">cd</span> <span class="s2">&quot;$ghpages_dir&quot;</span> <span class="o">&amp;&amp;</span> rm -rf *
+  <span class="k">if</span> <span class="o">[</span> -n <span class="s2">&quot;$(git branch | grep &quot;</span>  gh-pages<span class="s2">&quot;)&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+<span class="k">    </span>git checkout --force --quiet gh-pages
+  <span class="k">else</span>
+<span class="k">    </span>git checkout --force --quiet -b gh-pages origin/gh-pages &gt; /dev/null
+  <span class="k">fi</span>
+<span class="k">  </span><span class="nb">echo</span> -n <span class="s2">&quot;Finding Docas Commits Hashes...       &quot;</span>
+  <span class="nv">synced_docas_commit</span><span class="o">=</span><span class="k">$(</span>git log --pretty<span class="o">=</span>oneline | egrep -m 1 -i <span class="s2">&quot;^[0-9a-f]+.* docas.*synced.*[0-9a-f]+$&quot;</span> | xargs <span class="nb">echo</span><span class="k">)</span>
+  <span class="nv">synced_ghpages_hash</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span> <span class="s2">&quot;$synced_docas_commit&quot;</span> | head -c 7<span class="k">)</span>
+  <span class="nv">synced_sources_hash</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span> <span class="s2">&quot;$synced_docas_commit&quot;</span> | head -c 69 | tail -c 7<span class="k">)</span>
+  <span class="nb">cd</span> <span class="s2">&quot;$sources_dir&quot;</span>
+  <span class="nv">synced_sources_hash</span><span class="o">=</span><span class="k">$(</span>git log --pretty<span class="o">=</span>oneline | egrep -m 1 <span class="s2">&quot;^$synced_sources_hash&quot;</span> | head -c 7 | xargs <span class="nb">echo</span><span class="k">)</span>
+  <span class="nb">echo</span> -n <span class="s2">&quot;✓&quot;</span> <span class="k">$(</span>date <span class="s2">&quot;+%H:%M:%S&quot;</span><span class="k">)</span> <span class="s2">&quot; &quot;</span></pre></div></td></tr>
+
+
+<tr id="section-18"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-18">&#182;</a></div><p>In case of <code>synced_ghpages_hash</code> is an empty string, <code>synced_sources_hash</code> equals head_hash.</p></td><td class="code"><div class="highlight"><pre>  <span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;$synced_ghpages_hash&quot;</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="o">[</span> <span class="s2">&quot;$synced_sources_hash&quot;</span> <span class="o">==</span> <span class="s2">&quot;$head_hash&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+
+<span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;Already synched with latest commit.&quot;</span>
+    <span class="nb">exit </span>0
+
+  <span class="k">fi</span></pre></div></td></tr>
+
+
+<tr id="section-19"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-19">&#182;</a></div><p>If we can not securely list all touched files, docas will treat all files as
+touched.</p></td><td class="code"><div class="highlight"><pre>  <span class="k">if</span> <span class="o">[</span> -z <span class="s2">&quot;$synced_ghpages_hash&quot;</span> <span class="o">]</span> <span class="o">||</span> <span class="o">[</span> -z <span class="s2">&quot;$synced_sources_hash&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+
+<span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;Out-of-sync for a long time, rebuilding...&quot;</span>
+    all_files_are_touched
+    </pre></div></td></tr>
+
+
+<tr id="section-20"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-20">&#182;</a></div><p>If we can securely list all touched files in the <code>master</code> and <code>gh-pages</code>
+branch since last sync, output unique directories into dirty_directories file.</p></td><td class="code"><div class="highlight"><pre>  <span class="k">else</span>
+
+<span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;Previously synced with $synced_sources_hash&quot;</span>
+    <span class="nb">cd</span> <span class="s2">&quot;$sources_dir&quot;</span>
+    git diff --name-status <span class="nv">$synced_sources_hash</span>..HEAD &gt; <span class="s2">&quot;$working_dir/.git-diff&quot;</span>
+    <span class="k">if</span> <span class="o">[</span> -n <span class="s2">&quot;$(cat &quot;</span><span class="nv">$working_dir</span>/.git-diff<span class="s2">&quot; | grep &quot;</span><span class="se">\.</span>docas<span class="se">\/</span>conf<span class="s2">&quot;)&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+<span class="k">      </span>all_files_are_touched
+    <span class="k">else</span>
+<span class="k">      </span>egrep <span class="s2">&quot;^(A|M)&quot;</span> <span class="s2">&quot;$working_dir/.git-diff&quot;</span> | cut -c 3- &gt; <span class="s2">&quot;$working_dir/.touched&quot;</span>
+      egrep <span class="s2">&quot;^D&quot;</span>     <span class="s2">&quot;$working_dir/.git-diff&quot;</span> | cut -c 3- &gt; <span class="s2">&quot;$working_dir/.deleted&quot;</span>
+    <span class="k">fi</span>
+
+<span class="k">  fi</span>
+
+<span class="k">fi</span></pre></div></td></tr>
+
+
+<tr id="section-21"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-21">&#182;</a></div><h3>Step 3: Language Analysis, List Touched Sources</h3></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-22"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-22">&#182;</a></div><p>Get language statistics, all and touched sources from <code>Linguist HTTP</code> server
+listening local port 4567.</p></td><td class="code"><div class="highlight"><pre><span class="nb">echo</span> -n <span class="s2">&quot;Calling Linguist HTTP @ port 4567...  &quot;</span>
+touch <span class="s2">&quot;$working_dir/.statist&quot;</span>
+touch <span class="s2">&quot;$working_dir/.touched_sources&quot;</span>
+touch <span class="s2">&quot;$working_dir/.deleted_sources&quot;</span>
+curl --silent --output <span class="s2">&quot;$working_dir/.statist&quot;</span>         <span class="s2">&quot;http://127.0.0.1:4567/statist?path=$sources_dir&quot;</span>
+<span class="nb">echo</span> <span class="s2">&quot;.touched_sources&quot;</span>
+curl --silent --output <span class="s2">&quot;$working_dir/.touched_sources&quot;</span> <span class="s2">&quot;http://127.0.0.1:4567/sources?path=$sources_dir&amp;list=$working_dir/.touched&quot;</span></pre></div></td></tr>
+
+
+<tr id="section-23"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-23">&#182;</a></div><p>curl --silent --output "$working<em>dir/.deleted</em>sources" "http://127.0.0.1:4567/sources?path=$sources<em>dir&amp;list=$working</em>dir/.deleted"</p></td><td class="code"><div class="highlight"><pre><span class="nb">echo</span> <span class="s2">&quot;✓&quot;</span> <span class="k">$(</span>date <span class="s2">&quot;+%H:%M:%S&quot;</span><span class="k">)</span></pre></div></td></tr>
+
+
+<tr id="section-24"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-24">&#182;</a></div><h3>Step 4: Synchronize Documents (using Docco)</h3></td><td class="code"><div class="highlight"><pre><span class="nb">echo</span> -n <span class="s2">&quot;Synchronizing Documents...            &quot;</span></pre></div></td></tr>
+
+
+<tr id="section-25"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-25">&#182;</a></div><ul>
+<li>Synchronize deleted sources. Delete the according documents for all deleted
+sources. Take care of hidden file without an extension.</li>
+</ul></td><td class="code"><div class="highlight"><pre><span class="nb">cd</span> <span class="s2">&quot;$ghpages_dir&quot;</span>
+cat <span class="s2">&quot;$working_dir/.deleted&quot;</span> | <span class="k">while </span><span class="nb">read </span>file; <span class="k">do</span>
+<span class="k">  </span><span class="nv">deleted_document</span><span class="o">=</span><span class="k">${</span><span class="nv">file</span><span class="p">%.*</span><span class="k">}</span>
+  <span class="k">if</span> <span class="o">[</span> -z <span class="nv">$deleted_document</span> <span class="o">]</span>; <span class="k">then </span><span class="nv">deleted_document</span><span class="o">=</span><span class="nv">$file</span>; <span class="k">fi</span>
+<span class="k">  if</span> <span class="o">[</span> -f <span class="s2">&quot;$deleted_document.html&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+<span class="k">    </span><span class="nb">echo</span> <span class="nv">$file</span> &gt;&gt; <span class="s2">&quot;$working_dir&quot;</span>/.deleted_sources
+    rm -f <span class="s2">&quot;$deleted_document.html&quot;</span>
+  <span class="k">fi</span>
+<span class="k">done</span>
+
+ </pre></div></td></tr>
+
+
+<tr id="section-26"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-26">&#182;</a></div><ul>
+<li>Generate documents using docco.</li>
+</ul></td><td class="code"><div class="highlight"><pre><span class="nb">cd</span> <span class="s2">&quot;$sources_dir&quot;</span></pre></div></td></tr>
+
+
+<tr id="section-27"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-27">&#182;</a></div><p>time find . -iname "*.js" | xargs du | sort -n -r | cut -f 2 | xargs docco -r baoshan/d3 -o x > /dev/null</p></td><td class="code"><div class="highlight"><pre>cat <span class="s2">&quot;$working_dir/.touched_sources&quot;</span> | tr <span class="s1">&#39;\n&#39;</span> <span class="s1">&#39;\0&#39;</span> | xargs -0 docco -r <span class="s2">&quot;$repo&quot;</span> -o <span class="s2">&quot;$ghpages_dir&quot;</span> <span class="c"># &gt; /dev/null</span>
+
+<span class="nb">echo</span> <span class="s2">&quot;✓&quot;</span> <span class="k">$(</span>date <span class="s2">&quot;+%H:%M:%S&quot;</span><span class="k">)</span></pre></div></td></tr>
+
+
+<tr id="section-28"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-28">&#182;</a></div><h3>Step 5: Generate Cover Page using Docci</h3></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-29"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-29">&#182;</a></div><p>Update file and folder indexes for touched file and folder using <strong><a href="doccx.html">doccx</a></strong>.</p>
+
+<p>Doccx will generated <code>docas.idx</code> in <code>docas/tree</code> folder for all folders list
+in the follow input:</p>
+
+<ol>
+<li><code>.touched</code></li>
+<li><code>.deleted</code></li>
+</ol></td><td class="code"><div class="highlight"><pre><span class="nb">echo</span> -n <span class="s2">&quot;Generating File &amp; Folder Indexes...   &quot;</span></pre></div></td></tr>
+
+
+<tr id="section-30"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-30">&#182;</a></div><p>doccx -s "$sources<em>dir" -w "$working</em>dir"
+cat "$working<em>dir/.touched" "$working</em>dir/.deleted" | \</p></td><td class="code"><div class="highlight"><pre>ruby /usr/local/lib/docas/src/server/doccx.rb --working <span class="s2">&quot;$working_dir&quot;</span> --sources <span class="s2">&quot;$sources_dir&quot;</span>
+<span class="nb">echo</span> <span class="s2">&quot;✓&quot;</span> <span class="k">$(</span>date <span class="s2">&quot;+%H:%M:%S&quot;</span><span class="k">)</span></pre></div></td></tr>
+
+
+<tr id="section-31"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-31">&#182;</a></div><p>Upon this phase, following materials were all ready:</p>
+
+<p>+. a language statistics named <code>.statist</code>, and,</p>
+
+<p>Do:</p>
+
+<ol>
+<li>Make sure a stylesheet for <code>index.html</code> exists.</li>
+<li>Invoke the <strong><a href="docci.html">docci</a></strong> command-line program to generate <code>index.html</code>.</li>
+</ol></td><td class="code"><div class="highlight"><pre><span class="nb">echo</span> -n <span class="s2">&quot;Generating Repository Cover Page...   &quot;</span>
+docci <span class="s2">&quot;$sources_dir&quot;</span> <span class="s2">&quot;$ghpages_dir&quot;</span> <span class="s2">&quot;$repo&quot;</span>
+<span class="nb">echo</span> <span class="s2">&quot;✓&quot;</span> <span class="k">$(</span>date <span class="s2">&quot;+%H:%M:%S&quot;</span><span class="k">)</span></pre></div></td></tr>
+
+
+<tr id="section-32"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-32">&#182;</a></div><h3>Step 6: Static File Handling</h3></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-33"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-33">&#182;</a></div><p>Static files required by front-end web pages including:</p>
+
+<ul>
+<li><p>CSS stylesheets <em>(will be loaded from CDN in the future)</em>. Including:</p>
+
+<ul><li>Used by repository cover page.</li>
+<li>Used by documentations.</li></ul></li>
+</ul></td><td class="code"><div class="highlight"><pre><span class="nb">cd</span> <span class="s2">&quot;$ghpages_dir&quot;</span> <span class="o">&amp;&amp;</span> mkdir -p stylesheets
+cp /usr/local/lib/docas/resources/index.min.css stylesheets
+cp /usr/local/lib/docas/resources/docco.min.css stylesheets
+mkdir -p stylesheets/fonts
+cp /usr/local/lib/docas/resources/fonts/* stylesheets/fonts</pre></div></td></tr>
+
+
+<tr id="section-34"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-34">&#182;</a></div><ul>
+<li><p>JavaScripts <em>(loaded from CDN)</em>. Including:</p>
+
+<ul><li><a href="http://zeptojs.com/">zepto.js</a>, the aerogel-weight jQuery-compatible JavaScript library.</li>
+<li><a href="http://momentjs.com">moment.js</a>, a lightweight JavaScript date library, used by the file
+browser and the commits history.</li>
+<li><a href="http://projects.jga.me/toc/">toc.js</a>, generate inner-document navigation panel client-side.</li></ul></li>
+</ul></td><td class="code"><div class="highlight"><pre>mkdir -p javascript
+cp /usr/local/lib/docas/lib/client/index.min.js javascript
+cp /usr/local/lib/docas/lib/client/docco.min.js javascript</pre></div></td></tr>
+
+
+<tr id="section-35"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-35">&#182;</a></div><ul>
+<li>Copy other user specified files. All files in the <code>docas</code> folder of the
+<code>master</code> branch will be cloned into the same folder of the <code>gh-pages</code>
+branch.</li>
+</ul></td><td class="code"><div class="highlight"><pre><span class="k">if</span> <span class="o">[</span> -d <span class="s2">&quot;$sources_dir/.docas&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+<span class="k">  </span>mkdir -p <span class="s2">&quot;$ghpages_dir/docas&quot;</span>
+  cp <span class="s2">&quot;$sources_dir/.docas/&quot;</span>* <span class="s2">&quot;$ghpages_dir/docas&quot;</span>
+<span class="k">fi</span></pre></div></td></tr>
+
+
+<tr id="section-36"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-36">&#182;</a></div><h3>Step 7: Push to Upstream</h3></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-37"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-37">&#182;</a></div><p>Upon this phase, updated cover page (always will be updated) and
+documentations (probably will not be updated) are all ready. It's time to push
+back to <code>gh-pages</code> branch on GitHub.</p>
+
+<p>The <a href="http://schacon.github.com/git/git.html#_high_level_commands_porcelain">porcelain layer</a> of <code>git-status</code> is used to count files / folders  been
+created, modified, or deleted. Output the numbers to the terminal.</p></td><td class="code"><div class="highlight"><pre><span class="nb">echo</span> -n <span class="s2">&quot;Pushing &quot;</span>
+
+<span class="nb">cd</span> <span class="s2">&quot;$ghpages_dir&quot;</span>
+<span class="nv">status</span><span class="o">=</span><span class="s2">&quot;$(git status --porcelain)&quot;</span>
+<span class="nv">created</span><span class="o">=</span><span class="s2">&quot;$(echo &quot;</span><span class="nv">$status</span><span class="s2">&quot; | egrep &quot;</span>^<span class="o">(</span><span class="se">\?\?</span><span class="o">)</span><span class="s2">&quot; | wc -l)&quot;</span>
+<span class="nv">altered</span><span class="o">=</span><span class="s2">&quot;$(echo &quot;</span><span class="nv">$status</span><span class="s2">&quot; | egrep &quot;</span>^<span class="o">(</span>M| M<span class="o">)</span><span class="s2">&quot; | wc -l)&quot;</span>
+<span class="nv">deleted</span><span class="o">=</span><span class="s2">&quot;$(echo &quot;</span><span class="nv">$status</span><span class="s2">&quot; | egrep &quot;</span>^<span class="o">(</span>D| D<span class="o">)</span><span class="s2">&quot; | wc -l)&quot;</span>
+<span class="nb">echo</span> -n <span class="nv">$created</span>+, <span class="nv">$altered</span>~, <span class="nv">$deleted</span>- to GitHub...
+<span class="nb">echo</span> -en <span class="s2">&quot;\r\033[38C&quot;</span></pre></div></td></tr>
+
+
+<tr id="section-38"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-38">&#182;</a></div><p>Following below steps to update gh-pages:</p>
+
+<ol>
+<li>Synchronize git index with local files.</li>
+<li>Commit <code>gh-pages</code> branch.</li>
+<li>Synchronize <code>gh-pages</code> branch with GitHub remotely.</li>
+</ol></td><td class="code"><div class="highlight"><pre>git add .
+git commit --all --quiet --message <span class="s2">&quot;Docas.io synced with $head_hash: $head_subject&quot;</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$mode</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+<span class="k">  </span>git push --quiet origin gh-pages
+<span class="k">fi</span>
+<span class="nb">echo</span> <span class="s2">&quot;✓&quot;</span> <span class="k">$(</span>date <span class="s2">&quot;+%H:%M:%S&quot;</span><span class="k">)</span>
+<span class="nb">echo</span> <span class="s2">&quot;Crowd applauds.&quot;</span></pre></div></td></tr>
+
+
+<tr id="section-39"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-39">&#182;</a></div><h3>Step 8: Coda</h3></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-40"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-40">&#182;</a></div><p>If <code>gh-pages</code> branch of <code>sources_dir</code> is not up-to-date, next synchronization
+needs to pull <code>gh-pages</code> back before documenting, commit, and push. Thus takes
+longer.</p>
+
+<p>In order to improve performance, <code>docas</code> will ensure <code>sources_dir</code> up-to-date
+by:</p>
+
+<ol>
+<li>Checkout <code>master</code> branch of <code>ghpages_dir</code>.</li>
+<li>Overriding <code>sources_dir</code> using <code>ghpages_dir</code>.</li>
+<li>Delete local branch <code>gh-pages</code>. So pruning local branches with remote
+branches can synchronize local and remote branches.</li>
+</ol></td><td class="code"><div class="highlight"><pre><span class="k">if</span> <span class="o">[</span> <span class="nv">$mode</span> <span class="o">==</span> <span class="s2">&quot;development&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+
+<span class="k">  </span>rm -rf <span class="s2">&quot;$sources_dir&quot;</span> <span class="o">&amp;&amp;</span> cp -r <span class="s2">&quot;$ghpages_dir&quot;</span> <span class="s2">&quot;$sources_dir&quot;</span>
+
+<span class="k">else</span>
+
+<span class="k">  </span><span class="nb">cd</span> <span class="s2">&quot;$ghpages_dir&quot;</span> <span class="o">&amp;&amp;</span> git checkout --force --quiet master
+  rm -rf <span class="s2">&quot;$sources_dir&quot;</span> <span class="o">&amp;&amp;</span> cp -r <span class="s2">&quot;$ghpages_dir&quot;</span> <span class="s2">&quot;$sources_dir&quot;</span>
+  <span class="nb">cd</span> <span class="s2">&quot;$sources_dir&quot;</span> <span class="o">&amp;&amp;</span> git branch -D gh-pages &gt; /dev/null
+
+<span class="k">fi</span></pre></div></td></tr>
+
+
+<tr id="section-41"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-41">&#182;</a></div><p>Why not have a cup of coffee, Docas?</p>
+
+<p><link href="http://nicolasgallagher.com/lab/css3-github-buttons/gh-buttons.css" rel="stylesheet">
+<img style="float:left" src="https://a248.e.akamai.net/assets.github.com/images/modules/about_page/octocat.png?1334862345"></img>
+<img id="mug" style="display:none;float:left; margin:39px 0 0 70px;" src="../docas/coffeescript_logo.png"></img>
+<input id="coffee" class="button" style="float:left; margin-top:125px;" type="button" value="YES, PLEASE!"></input></p>
+
+<script>window.onload = function(){$('#coffee').click(function(){$('#mug').css('display', 'block');
+$(this).remove();})};
+</script></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+<script src="../docas/examples_docas.js" type="text/javascript"></script><script src="../docas/all_bin/docas_.js" type="text/javascript"></script>
+</body>
+<script>docas={repo:"baoshan/docas",depth:1}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="../javascript/docco.min.js"></script>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html><head><title>baoshan/docas » Cakefile
+
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="stylesheets/docco.min.css" />
+<link rel="stylesheet" type="text/css" media="all" href="docas/common.css" />
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="index.html"></a><h1>Cakefile</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div></td><td class="code"><div class="highlight"><pre><span class="p">{</span><span class="nx">spawn</span><span class="p">,</span> <span class="nx">exec</span><span class="p">}</span> <span class="o">=</span> <span class="nx">require</span> <span class="s">&#39;child_process&#39;</span>
+
+<span class="nx">option</span> <span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--prefix [DIR]&#39;</span><span class="p">,</span> <span class="s">&#39;set the installation prefix for `cake install`&#39;</span>
+<span class="nx">option</span> <span class="s">&#39;-w&#39;</span><span class="p">,</span> <span class="s">&#39;--watch&#39;</span><span class="p">,</span> <span class="s">&#39;continually build the docas library&#39;</span>
+<span class="nx">option</span> <span class="s">&#39;-a&#39;</span><span class="p">,</span> <span class="s">&#39;--auth [AUTH]&#39;</span><span class="p">,</span> <span class="s">&#39;specify basic authentication when install&#39;</span>
+
+<span class="nx">task</span> <span class="s">&#39;build&#39;</span><span class="p">,</span> <span class="s">&#39;build the docco library&#39;</span><span class="p">,</span> <span class="nf">(options) -&gt;</span>
+  <span class="nx">exec</span> <span class="p">[</span>
+    <span class="s">&#39;coffee &#39;</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;-c&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="k">if</span> <span class="nx">options</span><span class="p">.</span><span class="nx">watch</span> <span class="k">then</span> <span class="s">&#39;w&#39;</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">),</span> <span class="s">&#39;-o&#39;</span><span class="p">,</span> <span class="s">&#39;lib&#39;</span><span class="p">,</span> <span class="s">&#39;src&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">)</span>
+    <span class="s">&#39;coffee -cj lib/client/index.js src/shared/process_index.coffee src/shared/list_template.coffee src/client/index.coffee&#39;</span>
+    <span class="s">&#39;coffee -cj lib/client/docco.js src/shared/process_index.coffee src/client/docco.coffee&#39;</span>
+    <span class="s">&#39;java -jar ~/compiler.jar --js vendor/moment.js vendor/cookie.js lib/client/index.js --js_output_file lib/client/index.min.js&#39;</span>
+    <span class="s">&#39;java -jar ~/compiler.jar --js lib/client/docco.js --js_output_file lib/client/docco.min.js&#39;</span>
+    <span class="s">&#39;cleancss -o resources/index.min.css resources/index.css&#39;</span>
+    <span class="s">&#39;cleancss -o resources/docco.min.css resources/docco.css&#39;</span>
+  <span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s">&#39; &amp;&amp; &#39;</span><span class="p">),</span> <span class="nf">(err, stdout, stderr) -&gt;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">error</span> <span class="nx">stderr</span> <span class="k">if</span> <span class="nx">err</span>
+
+<span class="nx">task</span> <span class="s">&#39;install&#39;</span><span class="p">,</span> <span class="s">&#39;install the `docco`, `docci`, `doccx`, and `docas` command into /usr/local (or --prefix)&#39;</span><span class="p">,</span> <span class="nf">(options) -&gt;</span>
+  <span class="nv">base = </span><span class="nx">options</span><span class="p">.</span><span class="nx">prefix</span> <span class="o">or</span> <span class="s">&#39;/usr/local&#39;</span>
+  <span class="nv">lib  = </span><span class="nx">base</span> <span class="o">+</span> <span class="s">&#39;/lib/docas&#39;</span>
+  <span class="nx">exec</span> <span class="p">[</span>
+    <span class="s">&#39;mkdir -p &#39;</span> <span class="o">+</span> <span class="nx">lib</span>
+    <span class="s">&quot;printf </span><span class="si">#{</span><span class="nx">options</span><span class="p">.</span><span class="nx">auth</span><span class="si">}</span><span class="s"> &gt; /usr/local/lib/docas/auth&quot;</span>
+    <span class="s">&#39;cp -rf bin resources vendor lib src node_modules &#39;</span> <span class="o">+</span> <span class="nx">lib</span>
+    <span class="s">&#39;ln -sf &#39;</span> <span class="o">+</span> <span class="nx">lib</span> <span class="o">+</span> <span class="s">&#39;/bin/docco &#39;</span> <span class="o">+</span> <span class="nx">base</span> <span class="o">+</span> <span class="s">&#39;/bin/docco&#39;</span>
+    <span class="s">&#39;ln -sf &#39;</span> <span class="o">+</span> <span class="nx">lib</span> <span class="o">+</span> <span class="s">&#39;/bin/docci &#39;</span> <span class="o">+</span> <span class="nx">base</span> <span class="o">+</span> <span class="s">&#39;/bin/docci&#39;</span>
+    <span class="s">&#39;ln -sf &#39;</span> <span class="o">+</span> <span class="nx">lib</span> <span class="o">+</span> <span class="s">&#39;/bin/docas &#39;</span> <span class="o">+</span> <span class="nx">base</span> <span class="o">+</span> <span class="s">&#39;/bin/docas&#39;</span>
+  <span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s">&#39; &amp;&amp; &#39;</span><span class="p">),</span> <span class="nf">(err, stdout, stderr) -&gt;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">error</span> <span class="nx">stderr</span> <span class="k">if</span> <span class="nx">err</span>
+
+</pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+<script src="docas/all_./Cakefile_.js" type="text/javascript"></script>
+</body>
+<script>docas={repo:"baoshan/docas",depth:0}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="javascript/docco.min.js"></script>
+</html>

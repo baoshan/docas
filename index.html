@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html><head>
+<title>baoshan/docas - Literate Programming can be Quicker and Dirtier.</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" media="all" href="stylesheets/index.min.css" />
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td>
+<div style="position:absolute;top:0px;left:0px;width:525px">
+<a href="https://github.com/baoshan/docas"><img src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+</div>
+<h1>docas</h1>
+<p>Literate Programming can be Quicker and Dirtier.</p>
+<!--readme-->
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+<div class="markdown_browser"><p>Docas.io automatically documents your GitHub repo on GitHub pages.</p>
+
+<p>Every time you push new commits to GitHub, docas keeps the <code>master</code> branch
+(the source codes) and <code>gh-pages</code> branch (the documentation) in sync.</p>
+
+<h2>Alpha Release</h2>
+
+<ol>
+<li>Add <code>docas</code> as your collaborator.</li>
+<li>Add a Service Hook: <code>http://alpha.docas.io</code></li>
+</ol>
+
+<p>That's done. Test it with any push. The initial build may takes longer than
+following pushes.</p>
+
+<p>Both feature requests and bug reports are hearted!</p>
+
+<h2>How docas.io Works</h2>
+
+<p>Docas.io generates html documents using <a href="http://jashkenas.github.com/docco">docco</a> for all sources, plus a cover
+page (named <code>index.html</code> by default) for your GitHub repo automatically.</p>
+
+<p>Generated documents will be hosted using GitHub pages in the same repository
+which can be accessed from:</p>
+
+<pre><code>http://your_github_login.github.com/your_repository_name
+</code></pre>
+
+<p>Comments will be rendered with your code side by side to encourage literate
+programming styled development. Content of comments will be parsed as markdown
+to ensure readability, legibility, and also semanticity.</p>
+
+<p>Each time you push new commits to GitHub, docas.io synchronizes the documents
+with source automatically. So the documents will be always up-to-date.</p>
+
+<h2>Steps to Enjoying Docas.io</h2>
+
+<ul>
+<li><p>Classic Method</p>
+
+<ol><li>Add <code>docas</code> as your collaborator.</li>
+<li>Add the service hook at <code>htto://alpha.docas.io</code> from the <a href="https://help.github.com/articles/post-receive-hooks">admin panel</a> of your repo.</li>
+<li>You are done.</li></ol></li>
+<li><p>A Web Inferface is Planned</p></li>
+</ul>
+
+<h2>Become a Better Developer Right Now</h2>
+
+<ul>
+<li><p>Include a concise description for all folders and source files.</p>
+
+<ul><li>For source files, write the description at the first line as:
+  {COMMENT_SYMBOL}{FOUR SPACES}{THE DESCRIPTION}</li>
+<li>For markdown files, write the description at the first line as:
+  {FOUR SPACES}{THE DESCRIPTION}</li>
+<li>For directories, the description is the description for the <code>README.md</code> in
+that directory.</li>
+<li>For shebang scripts, write the description as source files following the
+shebang line. </li></ul></li>
+<li><p>Always do top-down design before coding.</p>
+
+<ul><li>Break large, complex tasks into many small, simple, and intuitive tasks.</li>
+<li>Write down each task's procedure using markdown in comments.</li>
+<li>Using docas.io to communicate the design with your team.</li>
+<li>Coding will become a breeze once your ideas got proofed.</li></ul></li>
+<li><p>Judge the sanity of your design by analysing source lines of code.</p>
+
+<ul><li>Tackle down the puzzle piece by piece.</li>
+<li>Control the source lines of code of all sources under a maintaibable size.</li></ul></li>
+<li><p>Maintain always up-to-date documentations using docas.io.</p>
+
+<ul><li>In two steps, have an always up-to-date documentation hosted at GitHub pages.</li>
+<li>Read the source by yourself.</li>
+<li>Invite your friends to use or comment on the source.</li></ul></li>
+</ul>
+
+<h2>Supported Languages</h2>
+
+<ul>
+<li>JavaScript</li>
+<li>CoffeeScript</li>
+<li>Ruby</li>
+<li>Python</li>
+<li>Perl</li>
+<li>Shell</li>
+<li>And suggest your favorite!</li>
+</ul></div>
+</td>
+<td>
+<!--content-->
+<div class="content">
+<h2 id="language_statistics_heading">Language Statistics</h2>
+<table id="code_stats">
+
+<tr>
+<td>59%</td>
+<td>CoffeeScript</td>
+<td><span data-lang="CoffeeScript"></span></td>
+<td style="width:400px;"><div><span data-lang="CoffeeScript" percent="59%" style="width:0%;"></span><span total="802"></span></div></td>
+</tr>
+<tr>
+
+<tr>
+<td>25%</td>
+<td>Shell</td>
+<td><span data-lang="Shell"></span></td>
+<td style="width:400px;"><div><span data-lang="Shell" percent="25%" style="width:0%;"></span><span total="342"></span></div></td>
+</tr>
+<tr>
+
+<tr>
+<td>12%</td>
+<td>Ruby</td>
+<td><span data-lang="Ruby"></span></td>
+<td style="width:400px;"><div><span data-lang="Ruby" percent="12%" style="width:0%;"></span><span total="167"></span></div></td>
+</tr>
+<tr>
+
+<tr>
+<td>3%</td>
+<td>JavaScript</td>
+<td><span data-lang="JavaScript"></span></td>
+<td style="width:400px;"><div><span data-lang="JavaScript" percent="3%" style="width:0%;"></span><span total="46"></span></div></td>
+</tr>
+<tr>
+
+</table>
+<h2 id="recent_commits_heading">Recent Commits</h2>
+<ol id="recent_commits">
+
+
+<li>Add Back-to-Home links, Baoshan Sheng, <span relative_date="1341228766000"></span></li>
+
+
+<li>update docco.css index.css, Zhengming Liu, <span relative_date="1341208348000"></span></li>
+
+
+<li>update index.css, Zhengming Liu, <span relative_date="1341207370000"></span></li>
+
+
+<li>Bypass README.md description, Baoshan Sheng, <span relative_date="1341141458000"></span></li>
+
+
+<li>Improve Document, Baoshan Sheng, <span relative_date="1341136851000"></span></li>
+
+</ol>
+<div id="filebrowser">
+<div id="breadcrumb"><span>docas</span></div>
+<div id="filelists"><div depth="0" class="filelist"><table class="repo_nav"> <thead><tr><th></th><th>name</th><th class="size"><span>sloc</span>&nbsp;&nbsp;<span>size</span></th><th>age</th><th class="message"><span>message</span>&nbsp;&nbsp;<span>description</span><div class="history"><a target="_blank" href="https://github.com/baoshan/docas/commits/master">history</a></div></th></tr></thead> <tbody>   <tr class="d"> <td class="icon"></td> <td><a forward>bin</a></td> <td class="size"><span>-</span><span>4 items</span></td> <td relative_date="1341141458000"></td> <td class="message"><div><span>Bypass README.md description</span><span class="file_browser_author" email="sheng@icmd.org"> Baoshan Sheng</span></div><div>Include 3 executable scripts: docas, docci, and docco.</div></td> </tr>  <tr class="d"> <td class="icon"></td> <td><a forward>resources</a></td> <td class="size"><span>-</span><span>5 items</span></td> <td relative_date="1341228766000"></td> <td class="message"><div><span>Add Back-to-Home links</span><span class="file_browser_author" email="sheng@icmd.org"> Baoshan Sheng</span></div><div></div></td> </tr>  <tr class="d"> <td class="icon"></td> <td><a forward>src</a></td> <td class="size"><span>-</span><span>3 items</span></td> <td relative_date="1341228766000"></td> <td class="message"><div><span>Add Back-to-Home links</span><span class="file_browser_author" email="sheng@icmd.org"> Baoshan Sheng</span></div><div></div></td> </tr>  <tr class="d"> <td class="icon"></td> <td><a forward>vendor</a></td> <td class="size"><span>-</span><span>4 items</span></td> <td relative_date="1339835186000"></td> <td class="message"><div><span>Shrink relative date</span><span class="file_browser_author" email="sheng@icmd.org"> Baoshan Sheng</span></div><div></div></td> </tr>  <tr class="f"> <td class="icon"></td> <td><a href="Cakefile.html">Cakefile</a></td> <td class="size"><span>27 lines</span><span>1.6K</span></td> <td relative_date="1339831256000"></td> <td class="message"><div><span>Test description for shebang file</span><span class="file_browser_author" email="sheng@icmd.org"> Baoshan Sheng</span></div><div></div></td> </tr>  <tr class="f markdown shown"> <td class="icon"></td> <td><a markdown="README.html">README.md</a></td> <td class="size"><span>58 lines</span><span>2.9K</span></td> <td relative_date="1340443027000"></td> <td class="message"><div><span>Update README.md</span><span class="file_browser_author" email="sheng@icmd.org"> Baoshan Sheng</span></div><div>README.md for project docas</div></td> </tr>  <tr class="f"> <td class="icon"></td> <td><a href="https://github.com/baoshan/docas/blob/master/package.json"target='_blank'>package.json</a></td> <td class="size"><span>-</span><span>595B</span></td> <td relative_date="1339497772000"></td> <td class="message"><div><span>Test Configuration</span><span class="file_browser_author" email="sheng@icmd.org"> Baoshan Sheng</span></div><div></div></td> </tr>  <tr class="f markdown"> <td class="icon"></td> <td><a markdown="repository_browser.html">repository_browser.md</a></td> <td class="size"><span>5 lines</span><span>277B</span></td> <td relative_date="1339754328000"></td> <td class="message"><div><span>Fix Markdown Example</span><span class="file_browser_author" email="sheng@icmd.org"> Baoshan Sheng</span></div><div></div></td> </tr>  </tbody> </table> <div class="spinner"></div> </div></div>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<script>docas={user:"baoshan",repo:"docas"};document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js':'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js') + '><\/script>')</script>
+<script src="javascript/index.min.js"></script>
+</body>
+</html>

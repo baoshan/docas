@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html><head><title>baoshan/docas » src › server › docci.coffee
+| Repository Cover Page Generator
+</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Docco">
+<link rel="stylesheet" media="all" href="../../stylesheets/docco.min.css" />
+<link rel="stylesheet" type="text/css" media="all" href="../../docas/common.css" />
+
+</head>
+<body>
+<div id="container">
+<div id="background"></div>
+<table cellpadding="0" cellspacing="0">
+<thead><tr><th class="docs"><a id="home" href="../../index.html"></a><h1>docci.coffee</h1></th><th class="code"></th></tr></thead>
+<tbody>
+
+
+<tr id="section-1"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-1">&#182;</a></div><pre><code>Repository Cover Page Generator
+</code></pre></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-2"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-2">&#182;</a></div><p><strong>Docci</strong> generates a simple cover page for each repository, helping users
+take a quick glance at the project. 
+The generated cover page contains following components:</p>
+
+<pre><code>1. A stats of languages and source lines of code.
+2. Log of recent changes.
+3. A GitHub-style file browser which can take you to the documentation
+   of that file.
+4. Last but not least, everything in your README.md file.
+</code></pre>
+
+<p>Since the input for generating the cover page is the whole project, you should
+invoke it from the command-line as:</p>
+
+<pre><code>docci path_to_your_repository
+</code></pre>
+
+<p>...will generate an HTML documentation page for the repository., </p>
+
+<p>The <a href="http://github.com/baoshan/docas">source for Docci</a> is available on GitHub,
+and released under the MIT license.</p>
+
+<p>Docco can be used to process any languages recognized by Linguist.</p></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-3"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-3">&#182;</a></div><h3>Main Documentation Generation Functions</h3></td><td class="code"><div class="highlight"><pre></pre></div></td></tr>
+
+
+<tr id="section-4"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-4">&#182;</a></div><p>Once all of the code is finished highlighting, we can generate the HTML file
+and write out the documentation. Pass the completed sections into the template
+found in <code>resources/index.jst</code></p></td><td class="code"><div class="highlight"><pre><span class="nv">generate_index = </span><span class="o">-&gt;</span>
+  <span class="nx">parse_recent_commits</span> <span class="nf">(recent_commits) -&gt;</span>
+    <span class="nv">readme = </span><span class="s">&#39;&#39;</span>
+    <span class="k">try</span> <span class="nv">readme = </span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span> <span class="s">&quot;</span><span class="si">#{</span><span class="nx">source_dir</span><span class="si">}</span><span class="s">/README.md&quot;</span><span class="p">,</span> <span class="s">&#39;utf-8&#39;</span>
+    <span class="nv">repo_index = </span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span> <span class="s">&quot;</span><span class="si">#{</span><span class="nx">target_dir</span><span class="si">}</span><span class="s">/docas.idx&quot;</span><span class="p">,</span> <span class="s">&#39;utf-8&#39;</span>
+    <span class="nx">call_github_repo_api</span> <span class="nf">(repo_object) -&gt;</span>
+      <span class="nv">index_html = </span><span class="nx">index_template</span>
+        <span class="nv">user: </span><span class="nx">user</span>
+        <span class="nv">repo: </span><span class="nx">repo</span>
+        <span class="nv">description: </span><span class="nx">repo_object</span><span class="p">.</span><span class="nx">description</span> <span class="o">or</span> <span class="s">&#39;&#39;</span>
+        <span class="nv">readme: </span><span class="nx">showdown</span><span class="p">.</span><span class="nx">makeHtml</span> <span class="nx">readme</span>
+        <span class="nv">language_statistics: </span><span class="nx">parse_language_statistics</span><span class="p">()</span>
+        <span class="nv">recent_commits: </span><span class="nx">recent_commits</span>
+        <span class="nv">files_list: </span><span class="nx">list_template</span>
+          <span class="nv">user       : </span><span class="nx">user</span>
+          <span class="nv">repo       : </span><span class="nx">repo</span>
+          <span class="nv">index_path : </span><span class="p">[]</span>
+          <span class="nv">size       : </span><span class="s">&#39;size&#39;</span>
+          <span class="nv">message    : </span><span class="s">&#39;message&#39;</span>
+          <span class="nv">entries    : </span><span class="nx">process_index</span><span class="p">(</span><span class="nx">repo_index</span><span class="p">,</span> <span class="p">[],</span> <span class="nx">repo</span><span class="p">)</span>
+      <span class="nx">fs</span><span class="p">.</span><span class="nx">writeFileSync</span> <span class="nx">target_file</span><span class="p">,</span> <span class="nx">index_html</span></pre></div></td></tr>
+
+
+<tr id="section-5"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-5">&#182;</a></div><h2>Get GitHub Repo Data</h2>
+
+<p>Here, <code>docas</code> get repository data from GitHub <a href="http://developer.github.com/v3/repos/">Repos API</a> using
+<a href="http://developer.github.com/v3/#authentication">Basic Authentication</a>.</p>
+
+<p>The username and password for authenticate will be read from an <code>auth</code> file
+when presents.</p></td><td class="code"><div class="highlight"><pre><span class="nv">call_github_repo_api = </span><span class="nf">(callback) -&gt;</span>
+
+  <span class="nv">authentication = </span><span class="s">&#39;&#39;</span>
+  <span class="k">try</span> <span class="nv">authentication = </span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&#39;/../../auth&#39;</span><span class="p">,</span> <span class="s">&#39;utf-8&#39;</span>
+
+  <span class="nv">options = </span>
+    <span class="nv">host: </span><span class="s">&#39;api.github.com&#39;</span>
+    <span class="nv">path: </span><span class="s">&quot;/repos/</span><span class="si">#{</span><span class="nx">user</span><span class="si">}</span><span class="s">/</span><span class="si">#{</span><span class="nx">repo</span><span class="si">}</span><span class="s">&quot;</span>
+    <span class="nv">auth: </span><span class="nx">authentication</span>
+
+  <span class="nv">req = </span><span class="nx">https</span><span class="p">.</span><span class="nx">get</span> <span class="nx">options</span><span class="p">,</span> <span class="nf">(res) -&gt;</span>
+    <span class="k">return</span> <span class="nx">callback</span> <span class="p">{}</span> <span class="k">if</span> <span class="nx">res</span><span class="p">.</span><span class="nx">statusCode</span> <span class="o">isnt</span> <span class="mi">200</span>
+    <span class="nv">json = </span><span class="s">&#39;&#39;</span>
+    <span class="nx">res</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="nf">(data) -&gt;</span> <span class="nx">json</span> <span class="o">+=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">()</span>
+    <span class="nx">res</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;end&#39;</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="nx">callback</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">json</span><span class="p">)</span>
+
+  <span class="nx">req</span><span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+  <span class="nx">req</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;error&#39;</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="nx">callback</span> <span class="p">{}</span></pre></div></td></tr>
+
+
+<tr id="section-6"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-6">&#182;</a></div><h2>Parse Language Statistics</h2></td><td class="code"><div class="highlight"><pre><span class="nv">parse_language_statistics = </span><span class="o">-&gt;</span>
+  <span class="nv">data = </span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span> <span class="s">&quot;</span><span class="si">#{</span><span class="nx">target_dir</span><span class="si">}</span><span class="s">/../.statist&quot;</span><span class="p">,</span> <span class="s">&#39;utf-8&#39;</span>
+  <span class="nv">pattern = </span><span class="sr">/(?:^|\n){(.*)}{(.*)}{(.*)}/g</span>
+  <span class="nv">result = </span><span class="k">while</span> <span class="nv">match = </span><span class="nx">pattern</span><span class="p">.</span><span class="nx">exec</span> <span class="nx">data</span>
+    <span class="nv">entry = </span>
+      <span class="nv">percent: </span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="nv">sloc: </span><span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+      <span class="nv">language: </span><span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+  <span class="nx">result</span></pre></div></td></tr>
+
+
+<tr id="section-7"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-7">&#182;</a></div><h2>Get Recent Commits</h2></td><td class="code"><div class="highlight"><pre><span class="nv">parse_recent_commits = </span><span class="nf">(callback) -&gt;</span>
+  <span class="nx">exec</span> <span class="s">&#39;git log -5 --format=&quot;{%aD}{%an}{%s}&quot;&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nv">cwd: </span><span class="nx">source_dir</span><span class="p">},</span> <span class="nf">(err, data) -&gt;</span>
+    <span class="k">return</span> <span class="nx">callback</span> <span class="nx">err</span><span class="p">,</span> <span class="kc">null</span> <span class="k">if</span> <span class="nx">err</span>
+    <span class="nv">pattern = </span><span class="sr">/(?:^|\n){(.*)}{(.*)}{(.*)}/g</span>
+    <span class="nv">result = </span><span class="k">while</span> <span class="nv">match = </span><span class="nx">pattern</span><span class="p">.</span><span class="nx">exec</span> <span class="nx">data</span>
+      <span class="nv">commit = </span>
+        <span class="nv">date: </span><span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]).</span><span class="nx">valueOf</span><span class="p">()</span>
+        <span class="nv">author: </span><span class="nx">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="nv">subject: </span><span class="nx">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="nx">callback</span> <span class="nx">result</span></pre></div></td></tr>
+
+
+<tr id="section-8"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-8">&#182;</a></div><p>Ensure that the destination directory exists.</p></td><td class="code"><div class="highlight"><pre><span class="nv">ensure_directory = </span><span class="nf">(dir, callback) -&gt;</span>
+  <span class="nx">exec</span> <span class="s">&quot;mkdir -p </span><span class="si">#{</span><span class="nx">dir</span><span class="si">}</span><span class="s">&quot;</span><span class="p">,</span> <span class="nx">callback</span></pre></div></td></tr>
+
+
+<tr id="section-9"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-9">&#182;</a></div><p>Require our external dependencies, including <strong>Showdown.js</strong>
+(the JavaScript implementation of Markdown).</p></td><td class="code"><div class="highlight"><pre><span class="nv">_ = </span><span class="nx">require</span> <span class="s">&#39;underscore&#39;</span>
+<span class="nv">fs = </span><span class="nx">require</span> <span class="s">&#39;fs&#39;</span>
+<span class="nv">path = </span><span class="nx">require</span> <span class="s">&#39;path&#39;</span>
+<span class="nv">https = </span><span class="nx">require</span> <span class="s">&#39;https&#39;</span>
+<span class="p">{</span><span class="nx">exec</span><span class="p">}</span> <span class="o">=</span> <span class="nx">require</span> <span class="s">&#39;child_process&#39;</span>
+<span class="nv">showdown = </span><span class="nx">require</span><span class="p">(</span><span class="s">&#39;../../vendor/showdown&#39;</span><span class="p">).</span><span class="nx">Showdown</span>
+<span class="nv">process_index = </span><span class="nx">require</span> <span class="s">&#39;../shared/process_index&#39;</span>
+<span class="nv">list_template = </span><span class="nx">require</span> <span class="s">&#39;../shared/list_template&#39;</span>
+<span class="nv">index_template = </span><span class="nx">_</span><span class="p">.</span><span class="nx">template</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s">&#39;/../../resources/index.jst&#39;</span><span class="p">,</span> <span class="s">&#39;utf-8&#39;</span></pre></div></td></tr>
+
+
+<tr id="section-10"><td class="docs"><div class="pilwrap"><a class="pilcrow" href="#section-10">&#182;</a></div><p>Calling pattern:
+    docci source<em>dir target</em>dir</p></td><td class="code"><div class="highlight"><pre><span class="nv">source_dir = </span><span class="nx">process</span><span class="p">.</span><span class="nx">ARGV</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nv">target_dir = </span><span class="nx">process</span><span class="p">.</span><span class="nx">ARGV</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="nx">user</span><span class="p">,</span> <span class="nx">repo</span><span class="p">]</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">ARGV</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="nx">split</span> <span class="s">&#39;/&#39;</span>
+<span class="nv">config = </span><span class="p">{}</span>
+<span class="k">try</span>
+  <span class="nv">config = </span><span class="nx">require</span><span class="p">(</span><span class="s">&#39;./config_parser&#39;</span><span class="p">).</span><span class="nx">parse</span> <span class="s">&quot;</span><span class="si">#{</span><span class="nx">source_dir</span><span class="si">}</span><span class="s">/.docas/conf&quot;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">config</span>
+<span class="nv">target_file = </span><span class="nx">target_dir</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">project_page</span> <span class="o">or</span> <span class="s">&#39;index.html&#39;</span><span class="p">)</span>
+<span class="nx">ensure_directory</span> <span class="nx">path</span><span class="p">.</span><span class="nx">dirname</span><span class="p">(</span><span class="nx">target_file</span><span class="p">),</span> <span class="o">-&gt;</span>
+  <span class="nx">generate_index</span><span class="p">()</span>
+
+</pre></div></td></tr>
+
+</tbody>
+</table>
+</div>
+<script src="../../docas/all_src/server/docci.coffee_.js" type="text/javascript"></script>
+</body>
+<script>docas={repo:"baoshan/docas",depth:2}</script>
+<script>document.write('<script src=' + ('__proto__' in {} ? 'http://cdnjs.cloudflare.com/ajax/libs/zepto/1.0rc1/zepto.min.js' : 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')+'><\\/script>')</script>
+<script src="http://baoshan.github.com/moment/min/moment.min.js"></script>
+<script src="../../javascript/docco.min.js"></script>
+</html>
