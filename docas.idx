@@ -1,8 +1,8 @@
 d | src |  | 3 items |  | Baoshan Sheng | sheng@icmd.org | 1341228766 |  | Add Back-to-Home links
-d | bin |  | 4 items |  | Baoshan Sheng | sheng@icmd.org | 1341141458 | Include 3 executable scripts: docas, docci, and docco. | Bypass README.md description
 f | README.md | s | 2.9K | 58 | Baoshan Sheng | sheng@icmd.org | 1340443027 |  | Update README.md
 f | Cakefile | s | 1.6K | 27 | Baoshan Sheng | sheng@icmd.org | 1339831256 |  | Test description for shebang file
+d | bin |  | 4 items |  | Baoshan Sheng | sheng@icmd.org | 1341141458 | Include 3 executable scripts: docas, docci, and docco. | Bypass README.md description
 f | repository_browser.md | s | 277B | 5 | Baoshan Sheng | sheng@icmd.org | 1339754328 |  | Fix Markdown Example
-d | vendor |  | 4 items |  | Baoshan Sheng | sheng@icmd.org | 1339835186 |  | Shrink relative date
-d | resources |  | 5 items |  | Zhengming Liu | liuzhengming@healskare.com | 1342437214 |  | update
+d | resources |  | 5 items |  | Zhengming Liu | liuzhengming@healskare.com | 1342437536 |  | update
 f | package.json | g | 595B |  | Baoshan Sheng | sheng@icmd.org | 1339497772 |  | Test Configuration
+d | vendor |  | 4 items |  | Baoshan Sheng | sheng@icmd.org | 1339835186 |  | Shrink relative date
