@@ -1,4 +1,4 @@
 f | README.md | s | 375B | 8 | Baoshan Sheng | sheng@icmd.org | 1341141458 | Include 3 executable scripts: docas, docci, and docco. | Bypass README.md description
-f | docco | s | 1.3K | 25 | Baoshan Sheng | sheng@icmd.org | 1339834793 |  Node.js shebang to generate documents (using /src/server/docco.coffee) | Improve file description
-f | docas | s | 14K | 342 | Baoshan Sheng | sheng@icmd.org | 1340425592 |  Main (shell) script to orchestrate building processes. | Remove Temporary Folder on Exit
 f | docci | s | 1.0K | 21 | Baoshan Sheng | sheng@icmd.org | 1339834793 |  Node.js shebang to generate index.html (using /src/server/docci.coffee) | Improve file description
+f | docas | s | 14K | 342 | Baoshan Sheng | sheng@icmd.org | 1340425592 |  Main (shell) script to orchestrate building processes. | Remove Temporary Folder on Exit
+f | docco | s | 1.3K | 25 | Baoshan Sheng | sheng@icmd.org | 1339834793 |  Node.js shebang to generate documents (using /src/server/docco.coffee) | Improve file description
